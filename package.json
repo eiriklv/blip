@@ -1,0 +1,14 @@
+{
+  "name": "blip",
+  "version": "1.0.0",
+  "description": "The most minimal blogging platform ever",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Eirik Vullum <evullum@gmail.com> (http://www.evconsult.no/)",
+  "license": "ISC",
+  "dependencies": {
+    "marked": "^0.3.3"
+  }
+}
