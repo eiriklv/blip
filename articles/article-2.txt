@@ -1,3 +1,7 @@
-This is the second article
+TITLE:Pictures of cool stuff
+DATE:2015 April 10th
+AUTHOR:Eirik
 
-blabla
+# Some stuff i think is nice
+
+![yum](http://pictures.topspeed.com/IMG/crop/201406/porsche-991-turbo-st_600x0w.jpg)

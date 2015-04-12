@@ -1,3 +1,17 @@
-This is the first article
+TITLE:Building stuff with node.js is awesome
+DATE:2015 April 10th
+AUTHOR:Eirik
 
-blabla
+# Building stuff with node.js
+
+hello
+
+world
+
+* get a good idea
+* do some prototyping
+* ship it!
+
+## Some other stuff
+
+![hello](http://gget.it/hm8jobmp/tumblr_ltjcmgHCkz1r0mxp5.jpg)
