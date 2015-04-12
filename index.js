@@ -2,31 +2,39 @@
 
 const http = require('http');
 const fs = require('fs');
+const path = require('path');
+const url = require('url');
+const util = require('util');
+const marked = require('marked');
 
 const siteName = 'My Perfect Site'
-const blogPageName = '/blog';
+const blogPageName = 'blog';
 
-const pages = fs.readdirSync(__dirname + '/pages');
-const articles = fs.readdirSync(__dirname + '/articles');
+function getContent(dir) {
+  return fs.readdirSync(__dirname + dir).reduce(function(result, entry) {
+    // split into meta section and content section
+    // create an object that contains
+    // - title
+    // - author
+    // - post time
+    // - etc..
+    // (depends on if it is an article or page)
+    result[path.basename(entry, '.txt')] = marked(fs.readFileSync(__dirname + dir + '/' + entry).toString());
+    return result;
+  }, {});
+}
 
-const pageContent = pages.reduce(function(result, page) {
-  result['/'+page] = fs.readFileSync(__dirname + '/pages/' + page);
-  return result;
-}, {});
+const pageContent = getContent('/pages');
+const articleContent = getContent('/articles');
 
-const articleContent = articles.reduce(function(result, article) {
-  result[article] = fs.readFileSync(__dirname + '/articles/' + article);
-  return result;
-}, {});
-
-function head() {
+function head(page, article) {
   return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${siteName}</title>
+      <title>${siteName + ' ' + page + ' ' + article}</title>
       <style>${fs.readFileSync(__dirname + '/style.css')}</style>
     </head>
     <body>
@@ -37,16 +45,22 @@ function end() {
   return `</body>`;
 }
 
-function header() {
+function header(page, article) {
   return `
-    <div>${siteName}</div>
-    <ul>${pages.map(function(page) { return '<li><a href="' + page + '">' + page + '</a></li>'}).join('\n')}</ul>
+    <div>${siteName + ' ' + page + ' ' + article}</div>
+    <ul>${Object.keys(pageContent).map(function(page) { return '<li><a href="/' + page + '">' + page + '</a></li>'}).join('\n')}</ul>
   `;
 }
 
-function body(page) {
+function renderPage(page) {
   return `
     <div>${pageContent[page]}</div>
+  `;
+}
+
+function renderArticle(article) {
+  return `
+    <div>${articleContent[article]}</div>
   `;
 }
 
@@ -58,7 +72,7 @@ function footer() {
 
 function listArticles() {
   return `
-    <div>List of articles</div>
+    <ul>${Object.keys(articleContent).map(function(article) { return '<li><a href="' + url.resolve('/articles/', article) + '">' + article + '</a></li>'}).join('\n')}</ul>
   `;
 }
 
@@ -67,10 +81,27 @@ function notFound() {
 }
 
 http.createServer(function(req, res) {
-  res.write(head() + '\n');
-  res.write(header() + '\n');
-  res.write((req.url === blogPageName ? listArticles() : (pageContent[req.url] ? body(req.url) : notFound())) + '\n')
+  let route = path.parse(req.url);
+  let page = pageContent[route.base];
+  let article = articleContent[route.name];
+  let isBlog = route.base === blogPageName;
+  let isHome = req.url === '/';
+
+  res.write(head(route.dir, route.name) + '\n');
+  res.write(header(route.dir, route.name) + '\n');
+
+  if (!page && !article && !isHome) {
+    res.write(notFound() + '\n');
+  } else {
+    if (page) res.write(renderPage(route.base));
+    if (isHome) res.write(renderPage('home'));
+    if (isBlog) res.write(listArticles());
+    if (article) res.write(renderArticle(route.name));
+  }
+
   res.write(footer() + '\n');
   res.write(end() + '\n');
-  res.end('hello world: ' + req.url);
+  res.write('req.url: ' + req.url + '\n');
+  res.write('route: ' + util.inspect(route));
+  res.end();
 }).listen(3000);
