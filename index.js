@@ -31,6 +31,7 @@ app.use(function(req, res) {
 
   res.write(renderHead(title) + '\n');
   res.write(renderHeader(title) + '\n');
+  res.write('<main>');
 
   if (!page && !article) {
     res.write(renderPage(pages['not-found']) + '\n');
@@ -40,8 +41,9 @@ app.use(function(req, res) {
     if (article) res.write(renderArticle(article));
   }
 
+  res.write('</main>' + '\n');
   res.write(renderFooter() + '\n');
-  res.write(renderEnd() + '\n');
+  res.write('</body>' + '\n');
   res.end();
 });
 
@@ -75,44 +77,45 @@ function renderHead(title) {
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${siteName + ' ' + title}</title>
+      <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic">
+      <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext">
       <link rel="stylesheet" type="text/css" href="/style.css">
     </head>
     <body>
   `;
 }
 
-function renderEnd() {
-  return `</body>`;
-}
-
 function renderHeader(title) {
   return `
     <header>
       <h1><a href="/">${siteName}</a></h1>
-      <ul>${
-        Object.keys(pages).map(function(page) {
-          return !pages[page].noMenu ? '<li><a href="/' + page + '">' + pages[page].title + '</a></li>' : null;
-        }).join('\n')
-      }</ul>
+      <nav>
+        <ul>${
+          Object.keys(pages).map(function(page) {
+            return !pages[page].noMenu ? '<li><a href="/' + page + '">' + pages[page].title + '</a></li>' : null;
+          }).join('\n')
+        }</ul>
+      </nav>
     </header>
   `;
 }
 
 function renderPage(page) {
   return `
-    <main>${page.content}</main>
+    <section>${page.content}</section>
   `;
 }
 
 function renderArticle(article) {
   return `
+    <summary>Author: ${article.author}</summary>
     <article>${article.content}</article>
   `;
 }
 
 function renderFooter() {
   return `
-    <footer>
+    <footer class="cf">
       <div class="left"><a href="">© ${(new Date()).getFullYear() + ' ' + siteName}</a></div>
       <div class="right">Powered by <a href="http://blip.me">Blip</a>.</div>
     </footer>

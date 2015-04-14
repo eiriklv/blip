@@ -5,3 +5,11 @@ AUTHOR:Eirik
 # Some stuff i think is nice
 
 ![yum](http://pictures.topspeed.com/IMG/crop/201406/porsche-991-turbo-st_600x0w.jpg)
+
+```js
+var test = 'crap';
+var test = 'crap';
+var test = 'crap';
+var test = 'crap';
+```
+
