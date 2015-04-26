@@ -43,7 +43,7 @@ app.use(function(req, res) {
 
   res.write('</main>' + '\n');
   res.write(renderFooter() + '\n');
-  res.write('</body>' + '\n');
+  res.write('</div></body>' + '\n');
   res.end();
 });
 
@@ -82,6 +82,7 @@ function renderHead(title) {
       <link rel="stylesheet" type="text/css" href="/style.css">
     </head>
     <body>
+      <div class="container">
   `;
 }
 
@@ -108,7 +109,12 @@ function renderPage(page) {
 
 function renderArticle(article) {
   return `
-    <summary>Author: ${article.author}</summary>
+    <h1 class="title">${article.title}</h1>
+    <summary>
+      <span>Author: ${article.author}</span>
+      <span> | </span>
+      <span>Posted: ${article.date}</span>
+    </summary>
     <article>${article.content}</article>
   `;
 }
