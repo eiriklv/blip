@@ -43,6 +43,7 @@ app.use(function(req, res) {
 
   res.write('</main>' + '\n');
   res.write(renderFooter() + '\n');
+  res.write(renderScripts() + '\n');
   res.write('</div></body>' + '\n');
   res.end();
 });
@@ -79,6 +80,7 @@ function renderHead(title) {
       <title>${siteName + ' ' + title}</title>
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic">
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext">
+      <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.5/styles/default.min.css">
       <link rel="stylesheet" type="text/css" href="/style.css">
     </head>
     <body>
@@ -125,6 +127,13 @@ function renderFooter() {
       <div class="left"><a href="">© ${(new Date()).getFullYear() + ' ' + siteName}</a></div>
       <div class="right">Powered by <a href="http://blip.me">Blip</a>.</div>
     </footer>
+  `;
+}
+
+function renderScripts() {
+  return `
+    <script src="//cdn.jsdelivr.net/highlight.js/8.5/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
   `;
 }
 
