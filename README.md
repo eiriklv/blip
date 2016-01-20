@@ -7,6 +7,6 @@ Used together with Github and Heroku publishing is as simple as a `git push`
 
 [Try Demo](https://blip-demo.herokuapp.com)
 
-![blip](http://s23.postimg.org/qfo1s3aeh/blip.png)
+![blip](http://s11.postimg.org/7pj2aempv/blip.png)
 
 WIP
