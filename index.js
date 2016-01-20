@@ -1,15 +1,14 @@
 /**
  * Dependencies
  */
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const url = require('url');
-const util = require('util');
-const marked = require('marked');
-const favicon = require('serve-favicon');
-const express = require('express');
-const app = express();
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import url from 'url';
+import util from 'util';
+import marked from 'marked';
+import favicon from 'serve-favicon';
+import express from 'express';
 
 /**
  * Config
@@ -27,6 +26,11 @@ const blogPageName = 'blog';
  */
 const pages = getContent('pages');
 const posts = getContent('posts');
+
+/**
+ * Create express app
+ */
+const app = express();
 
 /**
  * Add route handlers
