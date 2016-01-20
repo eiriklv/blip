@@ -99,7 +99,7 @@ function render(req, res) {
 
         <footer class="cf">
           <div class="left"><a href="">© ${(new Date()).getFullYear() + ' ' + siteName}</a></div>
-          <div class="right">Powered by <a href="http://blip.me">Blip</a>.</div>
+          <div class="right">Powered by <a href="https://github.com/eiriklv/blip">Blip</a>.</div>
         </footer>
 
         <!-- Scripts -->
