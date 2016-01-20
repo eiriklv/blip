@@ -1,5 +1,6 @@
-'use strict';
-
+/**
+ * Dependencies
+ */
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -10,52 +11,115 @@ const favicon = require('serve-favicon');
 const express = require('express');
 const app = express();
 
+/**
+ * Config
+ */
+const port = process.env.PORT || 3000;
+
+/**
+ * Blog settings
+ */
 const siteName = 'My Perfect Site'
 const blogPageName = 'blog';
-const pages = getContent('/pages');
-const articles = getContent('/articles');
 
+/**
+ * Cache blog content to memory
+ */
+const pages = getContent('pages');
+const posts = getContent('posts');
+
+/**
+ * Add route handlers
+ */
 app.use(express.static('static'));
+app.use(favicon(`${__dirname}/favicon.ico`));
+app.use(render);
 
-app.use(favicon(__dirname + '/favicon.ico'));
+/**
+ * Start server
+ */
+app.listen(port, () => console.log(`Listening to port ${port}`));
 
-app.use(function(req, res) {
+/**
+ * Blog rendering engine
+ */
+function render(req, res) {
   let route = req.url === '/' ?
     path.parse('/home') :
     path.parse(req.url);
 
-  let page = pages[route.base];
-  let article = articles[route.name];
-  let title = (page && page.title) || (article && article.title);
   let isBlog = route.base === blogPageName;
+  let post = posts[route.name];
+  let page = pages[route.base];
+  let notFound = pages['not-found'];
+  let { title } = post || page || notFound;
 
-  res.write(renderHead(title) + '\n');
-  res.write(renderHeader(title) + '\n');
-  res.write('<main>');
+  let markup = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${siteName + ' | ' + title}</title>
+      <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic">
+      <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext">
+      <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.5/styles/default.min.css">
+      <link rel="stylesheet" type="text/css" href="/style.css">
+    </head>
+    <body>
+      <div class="container">
 
-  if (!page && !article) {
-    res.write(renderPage(pages['not-found']) + '\n');
-  } else {
-    if (page) res.write(renderPage(page));
-    if (isBlog) res.write(listArticles());
-    if (article) res.write(renderArticle(article));
-  }
+        <!-- Header -->
 
-  res.write('</main>' + '\n');
-  res.write(renderFooter() + '\n');
-  res.write(renderScripts() + '\n');
-  res.write('</div></body>' + '\n');
-  res.end();
-});
+        <header>
+          <h1><a href="/">${siteName}</a></h1>
+          <nav>
+            <ul>
+              ${Object.keys(pages).map((page) => {
+                return !pages[page].noMenu ? '<li><a href="/' + page + '">' + pages[page].title + '</a></li>' : '';
+              }).join('\n')}
+            </ul>
+          </nav>
+        </header>
 
-app.listen(3000);
+        <!-- Main section -->
 
+        <main>
+          ${!page && !post ? renderPage(notFound) : ''}
+          ${page ? renderPage(page) : ''}
+          ${post ? renderPost(post) : ''}
+          ${isBlog ? listPosts(posts) : ''}
+        </main>
+
+        <!-- Footer -->
+
+        <footer class="cf">
+          <div class="left"><a href="">© ${(new Date()).getFullYear() + ' ' + siteName}</a></div>
+          <div class="right">Powered by <a href="http://blip.me">Blip</a>.</div>
+        </footer>
+
+        <!-- Scripts -->
+
+        <script src="//cdn.jsdelivr.net/highlight.js/8.5/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script>
+
+      </div>
+    </body>
+  `;
+
+  res.end(markup);
+}
+
+/**
+ * Helper function to get blog
+ * content from markdown files
+ */
 function getContent(dir) {
-  return fs.readdirSync(__dirname + dir).reduce(function(result, entry) {
-    let raw = fs.readFileSync(__dirname + dir + '/' + entry, 'utf-8').toString();
-    let regex = /(?:\r?\n){2}/g;
-    let meta = raw.split(regex)[0];
-    let content = raw.split(regex).slice(1).join('\n\n');
+  return fs.readdirSync(`${__dirname}/${dir}`).reduce((result, entry) => {
+    const raw = fs.readFileSync(`${__dirname}/${dir}/${entry}`, 'utf-8').toString();
+    const regex = /(?:\r?\n){2}/g;
+    const meta = raw.split(regex)[0];
+    const content = raw.split(regex).slice(1).join('\n\n');
 
     result[path.basename(entry, '.txt')] = {
       title: meta.match(/^TITLE:(.*)$/m) && meta.match(/^TITLE:(.*)$/m)[1],
@@ -70,81 +134,46 @@ function getContent(dir) {
   }, {});
 }
 
-function renderHead(title) {
+/**
+ * Function for rendering a page
+ */
+function renderPage({ content = 'No content' }) {
   return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${siteName + ' ' + title}</title>
-      <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic">
-      <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext">
-      <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.5/styles/default.min.css">
-      <link rel="stylesheet" type="text/css" href="/style.css">
-    </head>
-    <body>
-      <div class="container">
+    <section>${content}</section>
   `;
 }
 
-function renderHeader(title) {
+/**
+ * Function for rendering a post
+ */
+function renderPost({
+  title = 'No title',
+  author = 'No author',
+  date = 'No date',
+  content = 'No content'
+}) {
   return `
-    <header>
-      <h1><a href="/">${siteName}</a></h1>
-      <nav>
-        <ul>${
-          Object.keys(pages).map(function(page) {
-            return !pages[page].noMenu ? '<li><a href="/' + page + '">' + pages[page].title + '</a></li>' : null;
-          }).join('\n')
-        }</ul>
-      </nav>
-    </header>
-  `;
-}
-
-function renderPage(page) {
-  return `
-    <section>${page.content}</section>
-  `;
-}
-
-function renderArticle(article) {
-  return `
-    <h1 class="title">${article.title}</h1>
+    <h1 class="title">${title}</h1>
     <summary>
-      <span>Author: ${article.author}</span>
+      <span>Author: ${author}</span>
       <span> | </span>
-      <span>Posted: ${article.date}</span>
+      <span>Posted: ${date}</span>
     </summary>
-    <article>${article.content}</article>
+    <article>${content}</article>
   `;
 }
 
-function renderFooter() {
-  return `
-    <footer class="cf">
-      <div class="left"><a href="">© ${(new Date()).getFullYear() + ' ' + siteName}</a></div>
-      <div class="right">Powered by <a href="http://blip.me">Blip</a>.</div>
-    </footer>
-  `;
-}
-
-function renderScripts() {
-  return `
-    <script src="//cdn.jsdelivr.net/highlight.js/8.5/highlight.min.js"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
-  `;
-}
-
-function listArticles() {
+/**
+ * Function for listing available posts
+ */
+function listPosts(posts) {
   return `
     <section>
-      <ul>${
-        Object.keys(articles).map(function(article) {
-          return '<li><a href="' + url.resolve('/articles/', article) + '">' + articles[article].title + '</a></li>'
-        }).join('\n')
-      }</ul>
+      <ul>
+        ${Object.keys(posts).map((post) => {
+          return `<li><a href="${url.resolve('/posts/', post)}">${posts[post].title}</a></li>`
+        }).join('\n')}
+      </ul>
     </section>
   `;
 }
