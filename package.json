@@ -1,14 +1,17 @@
 {
   "name": "blip",
   "version": "1.0.0",
-  "description": "The most minimal blogging platform ever",
+  "description": "The most minimal node.js blogging platform ever",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "babel-node index.js"
   },
+  "engines": {
+    "node": "5.4.x"
+  },
   "author": "Eirik Vullum <evullum@gmail.com> (http://www.evconsult.no/)",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "autoprefixer": "^5.1.1",
     "babel": "^6.3.26",
