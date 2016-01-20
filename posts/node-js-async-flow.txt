@@ -18,7 +18,7 @@ __Here's a (poor) example of an express route:__
 * writing the result to a file
 * responding to the request with either a success or error message
 
-#### Approach 1 - Continuation Passing
+## Approach 1 - Continuation Passing
 
 ```javascript
 var express = require('express');
@@ -59,7 +59,7 @@ If we were to increase the number of processing steps it would get increasingly 
 
 In addition it doesn't feel DRY, as we are handling errors in each step of the flow, using the same line of code.
 
-#### Approach 2 - Named Continuation Passing
+## Approach 2 - Named Continuation Passing
 This example was provided by pmuellr - <a href="https://twitter.com/pmuellr">@pmuellr</a>.
 
 ```javascript
@@ -104,7 +104,7 @@ function onProcessFile(req, res) {
 
 At least with this approach you no longer nest the continuations deeply, but there are still some issues here with non-DRY handling of errors in each step of the flow. You might also have a difficult time following your flow as your number of steps grow larger.
 
-#### Approach 3 - Using async.js
+## Approach 3 - Using async.js
 
 Here's the same route using the async library and the waterfall method:
 
@@ -182,7 +182,7 @@ app.post('/process-file', function(req, res) {
 
 A lot better than the callback hell at least, but still it doesn't quite feel right.
 
-#### Approach 4 - Using highland.js (streams)
+## Approach 4 - Using highland.js (streams)
 
 Recently I've taken the liking of <a href="https://github.com/caolan">@caolan</a>'s <a href="http://highlandjs.org/">highland</a> library, which is a high level streams library that aims to be fully compatible with native node.js streams. I won't be going in to the library workings in this post, but here's the same route using highland streams:
 
@@ -216,7 +216,7 @@ app.post('/process-file', function(req, res) {
 
 I find this approach readable and extensible. This is a functional approach that makes your application more maintainable and easy to reason about. Even if we added 50 more steps, it would still be easy to get a quick grip of the application flow. I highly encourage anyone who creates JavaScript applications to take a look at <a href="https://github.com/caolan/highland">this library</a>, and <a href="http://nodejs.org/api/stream.html">node.js streams</a> in general.
 
-#### Approach 5 - Promises (bluebird)
+## Approach 5 - Promises (bluebird)
 
 Credit to Esailija - <a href="https://twitter.com/PetkaAntonov">@PetkaAntonov</a> (the maker of <a href="https://github.com/petkaantonov/bluebird">bluebird</a>) for chiming in with an example using promises.
 
@@ -248,7 +248,7 @@ As we can see from this example - promises is very much like streams, except the
 
 As a result of this I've spent the last week implementing promises (A+) from scratch just for learning, and it has been really fun and useful.
 
-#### Bonus example using highland and `.reduce()`
+## Bonus example using highland and `.reduce()`
 
 Credit to Lewis Ellis - <a href="https://twitter.com/LewisJEllis">@LewisJEllis</a> (one of the contributors of <a href="https://github.com/caolan/highland">highland</a>) for this clever example.
 
@@ -283,7 +283,7 @@ app.post('/process-file', function(req, res) {
 });
 ```
 
-#### Bonus example 2 using highland and `async.compose`
+## Bonus example 2 using highland and `async.compose`
 
 ```javascript
 var express = require('express');
