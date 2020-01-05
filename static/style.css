@@ -46,7 +46,7 @@ main {
 h1.title {
   text-align: center;
   margin: 0;
-  font-size: 4rem;
+  font-size: 3.5rem;
 }
 
 img {
@@ -75,6 +75,10 @@ article p {
   margin: 0rem 0 2rem;
   line-height: 1.5;
   font-size: 1.2rem;
+}
+
+article a {
+  color: #FFF;
 }
 
 article blockquote {
@@ -126,14 +130,14 @@ ul a {
 }
 
 .cf:before, .cf:after {
-    content: " ";
-    display: table;
+  content: " ";
+  display: table;
 }
 
 .cf:after {
-    clear: both;
+  clear: both;
 }
 
 .cf {
-    *zoom: 1;
+  *zoom: 1;
 }

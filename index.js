@@ -49,12 +49,13 @@ app.listen(port, () => console.log(`Listening to port ${port}`));
  */
 function render(req, res) {
   let route = req.url === '/' ?
-    path.parse('/home') :
-    path.parse(req.url);
+  path.parse('/home') :
+  path.parse(req.url);
 
   let isBlog = route.base === blogPageName;
   let post = posts[route.name];
   let page = pages[route.base];
+  let isFound = !!(post || page);
   let notFound = pages['not-found'];
   let { title } = post || page || notFound;
 
@@ -89,7 +90,7 @@ function render(req, res) {
         <!-- Main section -->
 
         <main>
-          ${!page && !post ? renderPage(notFound) : ''}
+          ${!isFound ? renderPage(notFound) : ''}
           ${page ? renderPage(page) : ''}
           ${post ? renderPost(post) : ''}
           ${isBlog ? listPosts(posts) : ''}
@@ -111,7 +112,9 @@ function render(req, res) {
     </body>
   `;
 
-  res.end(markup);
+  res
+  .status(isFound ? 200 : 404)
+  .end(markup);
 }
 
 /**
