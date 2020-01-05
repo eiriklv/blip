@@ -4,7 +4,7 @@
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>My Perfect Site | Node.js Asynchronous Flow</title>
+      <title>Thoughts and Explorations | Node.js Asynchronous Flow</title>
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic">
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext">
       <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.5/styles/default.min.css">
@@ -16,7 +16,7 @@
         <!-- Header -->
 
         <header>
-          <h1><a href="https://www.vullum.io/blip/">My Perfect Site</a></h1>
+          <h1><a href="https://www.vullum.io/blip/">Thoughts and Explorations</a></h1>
           <nav>
             <ul>
               <li><a href="https://www.vullum.io/blip/about">About</a></li>
@@ -58,8 +58,8 @@
 <li>writing the result to a file</li>
 <li>responding to the request with either a success or error message</li>
 </ul>
-<h1 id="approach-1-continuation-passing">Approach 1 - Continuation Passing</h1>
-<pre><code class="lang-javascript">var express = require(&#39;express&#39;);
+<h1 id="approach-1---continuation-passing">Approach 1 - Continuation Passing</h1>
+<pre><code class="language-javascript">var express = require(&#39;express&#39;);
 var fs = require(&#39;fs&#39;);
 var app = express();
 
@@ -88,14 +88,13 @@ app.post(&#39;/process-file&#39;, function(req, res) {
       });
     });
   });
-});
-</code></pre>
+});</code></pre>
 <p>Already with just these (relatively) simple steps in our route we are starting to have issues with readability and ease of reasoning (at least I am..). It is not immediately apparent what our route does.</p>
 <p>If we were to increase the number of processing steps it would get increasingly worse, and our application would get very hard to understand, maintain or extend.</p>
 <p>In addition it doesn&#39;t feel DRY, as we are handling errors in each step of the flow, using the same line of code.</p>
-<h1 id="approach-2-named-continuation-passing">Approach 2 - Named Continuation Passing</h1>
+<h1 id="approach-2---named-continuation-passing">Approach 2 - Named Continuation Passing</h1>
 <p>This example was provided by pmuellr - <a href="https://twitter.com/pmuellr">@pmuellr</a>.</p>
-<pre><code class="lang-javascript">var express = require(&#39;express&#39;)
+<pre><code class="language-javascript">var express = require(&#39;express&#39;)
 var fs = require(&#39;fs&#39;)
 var app = express()
 
@@ -131,12 +130,11 @@ function onProcessFile(req, res) {
     if (err) return res.status(500).send(err)
     res.status(200).send(&#39;processed successfully using callback hell&#39;)
   }
-}
-</code></pre>
+}</code></pre>
 <p>At least with this approach you no longer nest the continuations deeply, but there are still some issues here with non-DRY handling of errors in each step of the flow. You might also have a difficult time following your flow as your number of steps grow larger.</p>
-<h1 id="approach-3-using-async-js">Approach 3 - Using async.js</h1>
+<h1 id="approach-3---using-asyncjs">Approach 3 - Using async.js</h1>
 <p>Here&#39;s the same route using the async library and the waterfall method:</p>
-<pre><code class="lang-javascript">var express = require(&#39;express&#39;);
+<pre><code class="language-javascript">var express = require(&#39;express&#39;);
 var async = require(&#39;async&#39;);
 var fs = require(&#39;fs&#39;);
 var app = express();
@@ -175,11 +173,10 @@ app.post(&#39;/process-file&#39;, function(req, res) {
     if (err) return res.status(500).send(err);
     res.status(200).send(&#39;processed successfully using async lib&#39;);
   });
-});
-</code></pre>
+});</code></pre>
 <p>This approach makes it easier to see what our route is doing, and at least now we avoid repeating ourselves in the error handling.</p>
 <p>It could also be using the processing functions directly in the flow (since the arguments are the same as for the flow function) and create a named callback for the final handling:</p>
-<pre><code class="lang-javascript">var express = require(&#39;express&#39;);
+<pre><code class="language-javascript">var express = require(&#39;express&#39;);
 var async = require(&#39;async&#39;);
 var fs = require(&#39;fs&#39;);
 var app = express();
@@ -200,12 +197,11 @@ app.post(&#39;/process-file&#39;, function(req, res) {
     process3,
     fs.writeFile.bind(fs, outputFile)
   ], done);
-});
-</code></pre>
+});</code></pre>
 <p>A lot better than the callback hell at least, but still it doesn&#39;t quite feel right.</p>
-<h1 id="approach-4-using-highland-js-streams-">Approach 4 - Using highland.js (streams)</h1>
+<h1 id="approach-4---using-highlandjs-streams">Approach 4 - Using highland.js (streams)</h1>
 <p>Recently I&#39;ve taken the liking of <a href="https://github.com/caolan">@caolan</a>&#39;s <a href="http://highlandjs.org/">highland</a> library, which is a high level streams library that aims to be fully compatible with native node.js streams. I won&#39;t be going in to the library workings in this post, but here&#39;s the same route using highland streams:</p>
-<pre><code class="lang-javascript">var express = require(&#39;express&#39;);
+<pre><code class="language-javascript">var express = require(&#39;express&#39;);
 var _ = require(&#39;highland&#39;);
 var fs = require(&#39;fs&#39;);
 var app = express();
@@ -229,12 +225,11 @@ app.post(&#39;/process-file&#39;, function(req, res) {
     .apply(function(data) {
       res.status(200).send(&#39;processed successfully using highland streams&#39;)
     });
-});
-</code></pre>
+});</code></pre>
 <p>I find this approach readable and extensible. This is a functional approach that makes your application more maintainable and easy to reason about. Even if we added 50 more steps, it would still be easy to get a quick grip of the application flow. I highly encourage anyone who creates JavaScript applications to take a look at <a href="https://github.com/caolan/highland">this library</a>, and <a href="http://nodejs.org/api/stream.html">node.js streams</a> in general.</p>
-<h1 id="approach-5-promises-bluebird-">Approach 5 - Promises (bluebird)</h1>
+<h1 id="approach-5---promises-bluebird">Approach 5 - Promises (bluebird)</h1>
 <p>Credit to Esailija - <a href="https://twitter.com/PetkaAntonov">@PetkaAntonov</a> (the maker of <a href="https://github.com/petkaantonov/bluebird">bluebird</a>) for chiming in with an example using promises.</p>
-<pre><code class="lang-javascript">var express = require(&#39;express&#39;);
+<pre><code class="language-javascript">var express = require(&#39;express&#39;);
 var Promise = require(&quot;bluebird&quot;);
 var fs = Promise.promisifyAll(require(&#39;fs&#39;));
 var app = express();
@@ -254,13 +249,12 @@ app.post(&#39;/process-file&#39;, function(req, res) {
     .catch(function(err) {
       res.status(500).send(err);
     });
-});
-</code></pre>
+});</code></pre>
 <p>As we can see from this example - promises is very much like streams, except they only emit a single value. You can think of the <code>.then()</code> method of promises as an equivalent of <code>.pipe()</code> for node streams.</p>
 <p>As a result of this I&#39;ve spent the last week implementing promises (A+) from scratch just for learning, and it has been really fun and useful.</p>
-<h1 id="bonus-example-using-highland-and-reduce-">Bonus example using highland and <code>.reduce()</code></h1>
+<h1 id="bonus-example-using-highland-and-reduce">Bonus example using highland and <code>.reduce()</code></h1>
 <p>Credit to Lewis Ellis - <a href="https://twitter.com/LewisJEllis">@LewisJEllis</a> (one of the contributors of <a href="https://github.com/caolan/highland">highland</a>) for this clever example.</p>
-<pre><code class="lang-javascript">var express = require(&#39;express&#39;);
+<pre><code class="language-javascript">var express = require(&#39;express&#39;);
 var _ = require(&#39;highland&#39;);
 var fs = require(&#39;fs&#39;);
 var app = express();
@@ -287,10 +281,9 @@ app.post(&#39;/process-file&#39;, function(req, res) {
     }).apply(function (data) {
       return res.status(200).send(&#39;processed&#39;);
     });
-});
-</code></pre>
-<h1 id="bonus-example-2-using-highland-and-async-compose-">Bonus example 2 using highland and <code>async.compose</code></h1>
-<pre><code class="lang-javascript">var express = require(&#39;express&#39;);
+});</code></pre>
+<h1 id="bonus-example-2-using-highland-and-asynccompose">Bonus example 2 using highland and <code>async.compose</code></h1>
+<pre><code class="language-javascript">var express = require(&#39;express&#39;);
 var _ = require(&#39;highland&#39;);
 var async = require(&#39;async&#39;);
 var fs = require(&#39;fs&#39;);
@@ -321,8 +314,7 @@ app.post(&#39;/process-file&#39;, function(req, res) {
     })
     .each(function(data) {
       res.status(200).send(&#39;processed successfully using highland streams and async.compose&#39;);
-    });
-</code></pre>
+    });</code></pre>
 </article>
   
           
@@ -331,7 +323,7 @@ app.post(&#39;/process-file&#39;, function(req, res) {
         <!-- Footer -->
 
         <footer class="cf">
-          <div class="left"><a href="https://www.vullum.io/blip">© 2020 My Perfect Site</a></div>
+          <div class="left"><a href="https://www.vullum.io/blip">© 2020 Thoughts and Explorations</a></div>
           <div class="right">Powered by <a href="https://github.com/eiriklv/blip">Blip</a>.</div>
         </footer>
 
