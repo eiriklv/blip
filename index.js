@@ -1,24 +1,31 @@
 /**
  * Dependencies
  */
-import http from 'http';
-import fs from 'fs';
-import path from 'path';
-import url from 'url';
-import util from 'util';
-import marked from 'marked';
-import favicon from 'serve-favicon';
-import express from 'express';
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const url = require('url');
+const util = require('util');
+const marked = require('marked');
+const favicon = require('serve-favicon');
+const express = require('express');
+const { Sitemap } = require('sitemap');
 
 /**
  * Config
  */
 const port = process.env.PORT || 3000;
+const host = process.env.HOST || `http://localhost:${port}`;
 
 /**
  * Blog settings
  */
 const siteName = 'My Perfect Site'
+
+/**
+ * NOTE: Must be taken into consideration
+ * when generating the sitemap
+ */
 const blogPageName = 'blog';
 
 /**
@@ -33,10 +40,35 @@ const posts = getContent('posts');
 const app = express();
 
 /**
+ * Generate and serve sitemap
+ */
+app.get('/sitemap.xml', function (req, res) {
+  res.header('Content-Type', 'application/xml');
+
+  const pageEntries = Object.keys(pages)
+  .map((pageKey) => ({ url: `/${pageKey}` }));
+
+  const postEntries = Object.keys(posts)
+  .map((postKey) => ({ url: `/posts/${postKey}` }));
+
+  const sitemap = new Sitemap({
+    urls: [
+      { url: '/' },
+      ...pageEntries,
+      { url: `/${blogPageName}` },
+      ...postEntries,
+    ],
+    hostname: host,
+  });
+
+  res.send(sitemap.toString());
+});
+
+/**
  * Add route handlers
  */
 app.use(express.static('static'));
-app.use(favicon(`${__dirname}/favicon.ico`));
+app.use(favicon(`${__dirname}/static/favicon.ico`));
 app.use(render);
 
 /**
