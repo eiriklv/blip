@@ -10,8 +10,9 @@ const { spawn } = require('child_process');
 
 /**
  * Specify which host the server will be running on
+ * NOTE: We're just choosing a port that most likely is not in use
  */
-const host = process.env.HOST || 'http://localhost:3997';
+const host = 'http://localhost:3997';
 
 /**
  * Specify the output directory for the generated static files

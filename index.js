@@ -13,21 +13,25 @@ const { Sitemap } = require('sitemap');
 const { blip } = require('./package.json');
 
 /**
- * Blog settings
+ * Settings
  */
 const {
   homepage = '',
-  siteName = 'My Perfect Site',
+  siteName = 'My Blip Blog',
   blogPageName = 'posts',
 } = blip || {};
 
 /**
  * Config
  */
-const buildMode = process.argv[3] === 'build';
-const prefix = buildMode ? homepage : '';
 const port = process.env.PORT || process.argv[2] || 3000;
 const host = process.env.HOST || `http://localhost:${port}`;
+
+/**
+ * Support static sites on sub-path (github pages)
+ */
+const buildMode = process.argv[3] === 'build';
+const prefix = buildMode ? homepage : '';
 
 /**
  * Cache blog content to memory
@@ -108,7 +112,6 @@ function render(req, res) {
       <div class="container">
 
         <!-- Header -->
-
         <header>
           <h1><a href="${prefix}/">${siteName}</a></h1>
           <nav>
@@ -121,7 +124,6 @@ function render(req, res) {
         </header>
 
         <!-- Main section -->
-
         <main>
           ${!isFound ? renderPage(notFound) : ''}
           ${page ? renderPage(page) : ''}
@@ -130,17 +132,14 @@ function render(req, res) {
         </main>
 
         <!-- Footer -->
-
         <footer class="cf">
           <div class="left"><a href="${prefix}">© ${(new Date()).getFullYear() + ' ' + siteName}</a></div>
           <div class="right">Powered by <a href="https://github.com/eiriklv/blip">Blip</a>.</div>
         </footer>
 
         <!-- Scripts -->
-
         <script src="//cdn.jsdelivr.net/highlight.js/8.5/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script>
-
       </div>
     </body>
   `;
