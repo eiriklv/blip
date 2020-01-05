@@ -10,7 +10,16 @@ const marked = require('marked');
 const favicon = require('serve-favicon');
 const express = require('express');
 const { Sitemap } = require('sitemap');
-const { homepage } = require('./package.json');
+const { blip } = require('./package.json');
+
+/**
+ * Blog settings
+ */
+const {
+  homepage = '',
+  siteName = 'My Perfect Site',
+  blogPageName = 'posts',
+} = blip || {};
 
 /**
  * Config
@@ -19,17 +28,6 @@ const buildMode = process.argv[3] === 'build';
 const prefix = buildMode ? homepage : '';
 const port = process.env.PORT || process.argv[2] || 3000;
 const host = process.env.HOST || `http://localhost:${port}`;
-
-/**
- * Blog settings
- */
-const siteName = 'My Perfect Site'
-
-/**
- * NOTE: Must be taken into consideration
- * when generating the sitemap
- */
-const blogPageName = 'blog';
 
 /**
  * Cache blog content to memory
@@ -112,7 +110,7 @@ function render(req, res) {
         <!-- Header -->
 
         <header>
-          <h1><a href="${homepage}/">${siteName}</a></h1>
+          <h1><a href="${prefix}/">${siteName}</a></h1>
           <nav>
             <ul>
               ${Object.keys(pages).map((page) => {

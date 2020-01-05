@@ -1,15 +1,21 @@
 const fs = require('fs');
-const puppeteer = require('puppeteer');
 const axios = require('axios');
 const xml2js = require('xml2js');
 const mkdirp = require('mkdirp');
 const { join, dirname } = require('path');
 const rimraf = require('rimraf');
-const ncp = require('ncp').ncp;
+const { ncp } = require('ncp');
 const ghpages = require('gh-pages');
 const { spawn } = require('child_process');
 
+/**
+ * Specify which host the server will be running on
+ */
 const host = process.env.HOST || 'http://localhost:3997';
+
+/**
+ * Specify the output directory for the generated static files
+ */
 const output = 'dist';
 
 function wait(ms) {
@@ -67,6 +73,10 @@ function publish(path) {
   const server = spawn('node', ['index.js', '3997', 'build']);
   server.stdout.pipe(process.stdout)
   server.stderr.pipe(process.stdout);
+
+  /**
+   * Wait to ensure server is ready to accept incoming requests
+   */
   await wait(1000);
 
   /**

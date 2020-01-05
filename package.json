@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "publish": "node ./scripts/generate-static-site.js"
+    "publish": "node ./scripts/publish-static-site.js"
   },
   "engines": {
     "node": "13.5.x"
@@ -18,15 +18,18 @@
     "axios": "^0.19.0",
     "express": "^4.12.3",
     "gh-pages": "^2.1.1",
-    "marked": "^0.3.3",
+    "marked": "^0.8.0",
     "mkdirp": "^0.5.1",
     "ncp": "^2.0.0",
-    "puppeteer": "^2.0.0",
     "rimraf": "^3.0.0",
     "serve": "^11.3.0",
     "serve-favicon": "^2.2.0",
     "sitemap": "^5.1.0",
     "xml2js": "^0.4.23"
   },
-  "homepage": "https://www.vullum.io/blip"
+  "blip": {
+    "homepage": "https://www.vullum.io/blip",
+    "siteName": "Thoughts and Explorations",
+    "blogPageName": "posts"
+  }
 }
