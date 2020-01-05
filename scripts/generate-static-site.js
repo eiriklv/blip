@@ -6,9 +6,17 @@ const mkdirp = require('mkdirp');
 const { join, dirname } = require('path');
 const rimraf = require('rimraf');
 const ncp = require('ncp').ncp;
+const ghpages = require('gh-pages');
+const { spawn } = require('child_process');
 
-const host = process.env.HOST || 'http://localhost:3000';
+const host = process.env.HOST || 'http://localhost:3997';
 const output = 'dist';
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
 
 function copy(src, dest) {
   return new Promise((resolve, reject) => {
@@ -40,7 +48,27 @@ function writeFile(path, contents) {
   });
 }
 
+function publish(path) {
+  return new Promise((resolve, reject) => {
+    ghpages.publish(path, function(err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
 (async () => {
+  /**
+   * Start local server
+   */
+  const server = spawn('node', ['index.js', '3997', 'build']);
+  server.stdout.pipe(process.stdout)
+  server.stderr.pipe(process.stdout);
+  await wait(1000);
+
   /**
    * Delete existing files
    */
@@ -77,12 +105,9 @@ function writeFile(path, contents) {
    */
   const filePromises = url
   .map(async ({ loc }) => {
+    console.log(loc[0])
     const path = join(loc[0].split(`${host}`)[1], 'index.html');
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(loc[0]);
-    const html = await page.content();
-    await browser.close();
+    const { data: html } = await axios.get(loc[0]);
     return { path, html };
   });
 
@@ -94,4 +119,19 @@ function writeFile(path, contents) {
   for (let { path, html } of files) {
     await writeFile(join(output, path), html);
   }
+
+  /**
+   * Publish to github pages
+   */
+  await publish(output);
+
+  /**
+   * Remove dist folder
+   */
+  rimraf.sync(output);
+
+  /**
+   * Stop local server
+   */
+  server.kill('SIGINT');
 })();

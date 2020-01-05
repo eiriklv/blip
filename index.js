@@ -10,11 +10,14 @@ const marked = require('marked');
 const favicon = require('serve-favicon');
 const express = require('express');
 const { Sitemap } = require('sitemap');
+const { homepage } = require('./package.json');
 
 /**
  * Config
  */
-const port = process.env.PORT || 3000;
+const buildMode = process.argv[3] === 'build';
+const prefix = buildMode ? homepage : '';
+const port = process.env.PORT || process.argv[2] || 3000;
 const host = process.env.HOST || `http://localhost:${port}`;
 
 /**
@@ -101,7 +104,7 @@ function render(req, res) {
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic">
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext">
       <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.5/styles/default.min.css">
-      <link rel="stylesheet" type="text/css" href="/style.css">
+      <link rel="stylesheet" type="text/css" href="${prefix}/style.css?bust">
     </head>
     <body>
       <div class="container">
@@ -109,11 +112,11 @@ function render(req, res) {
         <!-- Header -->
 
         <header>
-          <h1><a href="/">${siteName}</a></h1>
+          <h1><a href="${homepage}/">${siteName}</a></h1>
           <nav>
             <ul>
               ${Object.keys(pages).map((page) => {
-                return !pages[page].noMenu ? '<li><a href="/' + page + '">' + pages[page].title + '</a></li>' : '';
+                return !pages[page].noMenu ? `<li><a href="${prefix}/` + page + '">' + pages[page].title + '</a></li>' : '';
               }).join('\n')}
             </ul>
           </nav>
@@ -131,7 +134,7 @@ function render(req, res) {
         <!-- Footer -->
 
         <footer class="cf">
-          <div class="left"><a href="">© ${(new Date()).getFullYear() + ' ' + siteName}</a></div>
+          <div class="left"><a href="${prefix}">© ${(new Date()).getFullYear() + ' ' + siteName}</a></div>
           <div class="right">Powered by <a href="https://github.com/eiriklv/blip">Blip</a>.</div>
         </footer>
 
@@ -210,7 +213,7 @@ function listPosts(posts) {
     <section>
       <ul>
         ${Object.keys(posts).map((post) => {
-          return `<li><a href="${url.resolve('/posts/', post)}">${posts[post].title}</a></li>`
+          return `<li><a href="${prefix}/${url.resolve('posts/', post)}">${posts[post].title}</a></li>`
         }).join('\n')}
       </ul>
     </section>
