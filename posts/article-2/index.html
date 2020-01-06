@@ -38,23 +38,23 @@
     </summary>
     <article><h1 id="some-stuff-i-think-is-nice">Some stuff i think is nice</h1>
 <p><img src="http://pictures.topspeed.com/IMG/crop/201406/porsche-991-turbo-st_600x0w.jpg" alt="yum"></p>
-<pre><code class="language-js">function getContent(dir) {
-  return fs.readdirSync(__dirname + dir).reduce(function(result, entry) {
-    let raw = fs.readFileSync(__dirname + dir + '/' + entry, 'utf-8').toString();
-    let regex = /(?:\r?\n){2}/g;
-    let meta = raw.split(regex)[0];
-    let content = raw.split(regex).slice(1).join('\n\n');
+<pre><code class="language-js hljs javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getContent</span>(<span class="hljs-params">dir</span>) </span>{
+  <span class="hljs-keyword">return</span> fs.readdirSync(__dirname + dir).reduce(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">result, entry</span>) </span>{
+    <span class="hljs-keyword">let</span> raw = fs.readFileSync(__dirname + dir + <span class="hljs-string">'/'</span> + entry, <span class="hljs-string">'utf-8'</span>).toString();
+    <span class="hljs-keyword">let</span> regex = <span class="hljs-regexp">/(?:\r?\n){2}/g</span>;
+    <span class="hljs-keyword">let</span> meta = raw.split(regex)[<span class="hljs-number">0</span>];
+    <span class="hljs-keyword">let</span> content = raw.split(regex).slice(<span class="hljs-number">1</span>).join(<span class="hljs-string">'\n\n'</span>);
 
-    result[path.basename(entry, '.txt')] = {
-      title: meta.match(/^TITLE:(.*)$/m) &amp;&amp; meta.match(/^TITLE:(.*)$/m)[1],
-      author: meta.match(/^AUTHOR:(.*)$/m) &amp;&amp; meta.match(/^AUTHOR:(.*)$/m)[1],
-      date: meta.match(/^DATE:(.*)$/m) &amp;&amp; meta.match(/^DATE:(.*)$/m)[1],
-      noMenu: meta.match(/^(NOMENU:1)$/m) ? true : false,
-      url: meta.match(/^URL:(.*)$/m) &amp;&amp; meta.match(/^URL:(.*)$/m)[1],
-      content: marked(content)
+    result[path.basename(entry, <span class="hljs-string">'.txt'</span>)] = {
+      <span class="hljs-attr">title</span>: meta.match(<span class="hljs-regexp">/^TITLE:(.*)$/m</span>) &amp;&amp; meta.match(<span class="hljs-regexp">/^TITLE:(.*)$/m</span>)[<span class="hljs-number">1</span>],
+      <span class="hljs-attr">author</span>: meta.match(<span class="hljs-regexp">/^AUTHOR:(.*)$/m</span>) &amp;&amp; meta.match(<span class="hljs-regexp">/^AUTHOR:(.*)$/m</span>)[<span class="hljs-number">1</span>],
+      <span class="hljs-attr">date</span>: meta.match(<span class="hljs-regexp">/^DATE:(.*)$/m</span>) &amp;&amp; meta.match(<span class="hljs-regexp">/^DATE:(.*)$/m</span>)[<span class="hljs-number">1</span>],
+      <span class="hljs-attr">noMenu</span>: meta.match(<span class="hljs-regexp">/^(NOMENU:1)$/m</span>) ? <span class="hljs-literal">true</span> : <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">url</span>: meta.match(<span class="hljs-regexp">/^URL:(.*)$/m</span>) &amp;&amp; meta.match(<span class="hljs-regexp">/^URL:(.*)$/m</span>)[<span class="hljs-number">1</span>],
+      <span class="hljs-attr">content</span>: marked(content)
     };
 
-    return result;
+    <span class="hljs-keyword">return</span> result;
   }, {});
 }</code></pre>
 </article>
