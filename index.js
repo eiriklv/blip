@@ -72,7 +72,7 @@ app.get('/sitemap.xml', function (req, res) {
 /**
  * Add route handlers
  */
-app.use(express.static('static'));
+app.use(prefix, express.static('static'));
 app.use(favicon(`${__dirname}/static/favicon.ico`));
 app.use(render);
 
@@ -105,11 +105,12 @@ function render(req, res) {
       <title>${siteName + ' | ' + title}</title>
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic">
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext">
-      <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.5/styles/default.min.css">
+      <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/default.min.css">
       <link rel="stylesheet" type="text/css" href="${prefix}/style.css?bust">
     </head>
     <body>
       <div class="container">
+        <!-- V2 -->
 
         <!-- Header -->
         <header>
@@ -138,8 +139,8 @@ function render(req, res) {
         </footer>
 
         <!-- Scripts -->
-        <script src="//cdn.jsdelivr.net/highlight.js/8.5/highlight.min.js"></script>
-        <script>hljs.initHighlightingOnLoad();</script>
+        <script type="text/javascript" src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
+        <script type="text/javascript">hljs.initHighlightingOnLoad();</script>
       </div>
     </body>
   `;

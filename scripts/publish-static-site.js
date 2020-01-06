@@ -1,5 +1,6 @@
 const fs = require('fs');
 const axios = require('axios');
+const puppeteer = require('puppeteer');
 const xml2js = require('xml2js');
 const mkdirp = require('mkdirp');
 const { join, dirname } = require('path');
@@ -115,10 +116,15 @@ function publish(path) {
    * Get the HTML for each of the pages
    */
   const filePromises = url
-  .map(async ({ loc }) => {
-    console.log(loc[0])
+  .map(async ({ loc }, i) => {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(loc[0]);
+    await page.waitFor(100);
+    await page.screenshot({ path: `example-${i}.png` });
+    const html = await page.content();
+    await browser.close();
     const path = join(loc[0].split(`${host}`)[1], 'index.html');
-    const { data: html } = await axios.get(loc[0]);
     return { path, html };
   });
 
