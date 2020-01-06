@@ -1,12 +1,9 @@
-
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
+<!DOCTYPE html><html lang="en"><head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Thoughts and Explorations | Pictures of cool stuff</title>
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic">
-      <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext">
+      <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato&amp;subset=latin,latin-ext">
       <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/default.min.css">
       <link rel="stylesheet" type="text/css" href="/blip/style.css?bust">
     </head>
@@ -42,12 +39,12 @@
 <p><img src="http://pictures.topspeed.com/IMG/crop/201406/porsche-991-turbo-st_600x0w.jpg" alt="yum"></p>
 <pre><code class="language-js">function getContent(dir) {
   return fs.readdirSync(__dirname + dir).reduce(function(result, entry) {
-    let raw = fs.readFileSync(__dirname + dir + &#39;/&#39; + entry, &#39;utf-8&#39;).toString();
+    let raw = fs.readFileSync(__dirname + dir + '/' + entry, 'utf-8').toString();
     let regex = /(?:\r?\n){2}/g;
     let meta = raw.split(regex)[0];
-    let content = raw.split(regex).slice(1).join(&#39;\n\n&#39;);
+    let content = raw.split(regex).slice(1).join('\n\n');
 
-    result[path.basename(entry, &#39;.txt&#39;)] = {
+    result[path.basename(entry, '.txt')] = {
       title: meta.match(/^TITLE:(.*)$/m) &amp;&amp; meta.match(/^TITLE:(.*)$/m)[1],
       author: meta.match(/^AUTHOR:(.*)$/m) &amp;&amp; meta.match(/^AUTHOR:(.*)$/m)[1],
       date: meta.match(/^DATE:(.*)$/m) &amp;&amp; meta.match(/^DATE:(.*)$/m)[1],
@@ -74,5 +71,5 @@
         <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script>
       </div>
-    </body>
-  
+    
+  </body></html>
