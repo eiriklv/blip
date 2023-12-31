@@ -1,43 +1,43 @@
 /**
  * Dependencies
  */
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const url = require('url');
-const util = require('util');
-const marked = require('marked');
-const favicon = require('serve-favicon');
-const express = require('express');
-const { Sitemap } = require('sitemap');
-const { blip } = require('./package.json');
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const url = require("url");
+const util = require("util");
+const marked = require("marked");
+const favicon = require("serve-favicon");
+const express = require("express");
+const { Sitemap } = require("sitemap");
+const { blip } = require("./package.json");
 
 /**
  * Settings
  */
 const {
-  homepage = '',
-  siteName = 'My Blip Blog',
-  blogPageName = 'posts',
+  homepage = "",
+  siteName = "My Blip Blog",
+  blogPageName = "posts",
 } = blip || {};
 
 /**
  * Config
  */
 const port = process.env.PORT || process.argv[2] || 3000;
-const host = process.env.HOST || `http://localhost:${port}`;
+const host = process.env.HOST || `http://localhost:${port}`;
 
 /**
  * Support static sites on sub-path (github pages)
  */
-const buildMode = process.argv[3] === 'build';
-const prefix = buildMode ? homepage : '';
+const buildMode = process.argv[3] === "build";
+const prefix = buildMode ? homepage : "";
 
 /**
  * Cache blog content to memory
  */
-const pages = getContent('pages');
-const posts = getContent('posts');
+const pages = getContent("pages");
+const posts = getContent("posts");
 
 /**
  * Create express app
@@ -47,23 +47,26 @@ const app = express();
 /**
  * Generate and serve sitemap
  */
-app.get('/sitemap.xml', function (req, res) {
-  res.header('Content-Type', 'application/xml');
+app.get("/sitemap.xml", function (req, res) {
+  const hostOverride = req.query.host || host;
+  res.header("Content-Type", "application/xml");
 
-  const pageEntries = Object.keys(pages)
-  .map((pageKey) => ({ url: `/${pageKey}` }));
+  const pageEntries = Object.keys(pages).map((pageKey) => ({
+    url: `/${pageKey}`,
+  }));
 
-  const postEntries = Object.keys(posts)
-  .map((postKey) => ({ url: `/posts/${postKey}` }));
+  const postEntries = Object.keys(posts).map((postKey) => ({
+    url: `/posts/${postKey}`,
+  }));
 
   const sitemap = new Sitemap({
     urls: [
-      { url: '/' },
+      { url: "/" },
       ...pageEntries,
       { url: `/${blogPageName}` },
       ...postEntries,
     ],
-    hostname: host,
+    hostname: hostOverride,
   });
 
   res.send(sitemap.toString());
@@ -72,7 +75,7 @@ app.get('/sitemap.xml', function (req, res) {
 /**
  * Add route handlers
  */
-app.use(prefix, express.static('static'));
+app.use(prefix, express.static("static"));
 app.use(favicon(`${__dirname}/static/favicon.ico`));
 app.use(render);
 
@@ -85,16 +88,14 @@ app.listen(port, () => console.log(`Listening to port ${port}`));
  * Blog rendering engine
  */
 function render(req, res) {
-  let route = req.url === '/' ?
-  path.parse('/home') :
-  path.parse(req.url);
+  let route = req.url === "/" ? path.parse("/home") : path.parse(req.url);
 
   let isBlog = route.base === blogPageName;
   let post = posts[route.name];
   let page = pages[route.base];
-  let isFound = !!(post || page);
-  let notFound = pages['not-found'];
-  let { title } = post || page || notFound;
+  let isFound = !!(post || page);
+  let notFound = pages["not-found"];
+  let { title } = post || page || notFound;
 
   let markup = `
     <!DOCTYPE html>
@@ -102,7 +103,7 @@ function render(req, res) {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${siteName + ' | ' + title}</title>
+      <title>${siteName + " | " + title}</title>
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic">
       <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext">
       <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.17.1/build/styles/default.min.css">
@@ -117,24 +118,34 @@ function render(req, res) {
           <h1><a href="${prefix}/">${siteName}</a></h1>
           <nav>
             <ul>
-              ${Object.keys(pages).map((page) => {
-                return !pages[page].noMenu ? `<li><a href="${prefix}/` + page + '">' + pages[page].title + '</a></li>' : '';
-              }).join('\n')}
+              ${Object.keys(pages)
+                .map((page) => {
+                  return !pages[page].noMenu
+                    ? `<li><a href="${prefix}/` +
+                        page +
+                        '">' +
+                        pages[page].title +
+                        "</a></li>"
+                    : "";
+                })
+                .join("\n")}
             </ul>
           </nav>
         </header>
 
         <!-- Main section -->
         <main>
-          ${!isFound ? renderPage(notFound) : ''}
-          ${page ? renderPage(page) : ''}
-          ${post ? renderPost(post) : ''}
-          ${isBlog ? listPosts(posts) : ''}
+          ${!isFound ? renderPage(notFound) : ""}
+          ${page ? renderPage(page) : ""}
+          ${post ? renderPost(post) : ""}
+          ${isBlog ? listPosts(posts) : ""}
         </main>
 
         <!-- Footer -->
         <footer class="cf">
-          <div class="left"><a href="${prefix}">© ${(new Date()).getFullYear() + ' ' + siteName}</a></div>
+          <div class="left"><a href="${prefix}">© ${
+    new Date().getFullYear() + " " + siteName
+  }</a></div>
           <div class="right">Powered by <a href="https://github.com/eiriklv/blip">Blip</a>.</div>
         </footer>
 
@@ -145,9 +156,7 @@ function render(req, res) {
     </body>
   `;
 
-  res
-  .status(isFound ? 200 : 404)
-  .end(markup);
+  res.status(isFound ? 200 : 404).end(markup);
 }
 
 /**
@@ -156,18 +165,20 @@ function render(req, res) {
  */
 function getContent(dir) {
   return fs.readdirSync(`${__dirname}/${dir}`).reduce((result, entry) => {
-    const raw = fs.readFileSync(`${__dirname}/${dir}/${entry}`, 'utf-8').toString();
+    const raw = fs
+      .readFileSync(`${__dirname}/${dir}/${entry}`, "utf-8")
+      .toString();
     const regex = /(?:\r?\n){2}/g;
     const meta = raw.split(regex)[0];
-    const content = raw.split(regex).slice(1).join('\n\n');
+    const content = raw.split(regex).slice(1).join("\n\n");
 
-    result[path.basename(entry, '.txt')] = {
+    result[path.basename(entry, ".txt")] = {
       title: meta.match(/^TITLE:(.*)$/m) && meta.match(/^TITLE:(.*)$/m)[1],
       author: meta.match(/^AUTHOR:(.*)$/m) && meta.match(/^AUTHOR:(.*)$/m)[1],
       date: meta.match(/^DATE:(.*)$/m) && meta.match(/^DATE:(.*)$/m)[1],
       noMenu: meta.match(/^(NOMENU:1)$/m) ? true : false,
       url: meta.match(/^URL:(.*)$/m) && meta.match(/^URL:(.*)$/m)[1],
-      content: marked(content)
+      content: marked.parse(content),
     };
 
     return result;
@@ -177,7 +188,7 @@ function getContent(dir) {
 /**
  * Function for rendering a page
  */
-function renderPage({ content = 'No content' }) {
+function renderPage({ content = "No content" }) {
   return `
     <section>${content}</section>
   `;
@@ -187,10 +198,10 @@ function renderPage({ content = 'No content' }) {
  * Function for rendering a post
  */
 function renderPost({
-  title = 'No title',
-  author = 'No author',
-  date = 'No date',
-  content = 'No content'
+  title = "No title",
+  author = "No author",
+  date = "No date",
+  content = "No content",
 }) {
   return `
     <h1 class="title">${title}</h1>
@@ -210,9 +221,13 @@ function listPosts(posts) {
   return `
     <section>
       <ul>
-        ${Object.keys(posts).map((post) => {
-          return `<li><a href="${prefix}/${url.resolve('posts/', post)}">${posts[post].title}</a></li>`
-        }).join('\n')}
+        ${Object.keys(posts)
+          .map((post) => {
+            return `<li><a href="${prefix}/${url.resolve("posts/", post)}">${
+              posts[post].title
+            }</a></li>`;
+          })
+          .join("\n")}
       </ul>
     </section>
   `;

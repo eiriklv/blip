@@ -1,24 +1,26 @@
-const fs = require('fs');
-const axios = require('axios');
-const puppeteer = require('puppeteer');
-const xml2js = require('xml2js');
-const mkdirp = require('mkdirp');
-const { join, dirname } = require('path');
-const rimraf = require('rimraf');
-const { ncp } = require('ncp');
-const ghpages = require('gh-pages');
-const { spawn } = require('child_process');
+const fs = require("fs");
+const axios = require("axios");
+const puppeteer = require("puppeteer");
+const xml2js = require("xml2js");
+const mkdirp = require("mkdirp");
+const { join, dirname } = require("path");
+const rimraf = require("rimraf");
+const { ncp } = require("ncp");
+const ghpages = require("gh-pages");
+const { spawn } = require("child_process");
+const { blip } = require("../package.json");
 
 /**
  * Specify which host the server will be running on
  * NOTE: We're just choosing a port that most likely is not in use
  */
-const host = 'http://localhost:3997';
+const serverHost = "http://localhost:3997";
+const sitemapHost = blip.sitemapHost;
 
 /**
  * Specify the output directory for the generated static files
  */
-const output = 'dist';
+const output = "dist";
 
 function wait(ms) {
   return new Promise((resolve) => {
@@ -29,11 +31,11 @@ function wait(ms) {
 function copy(src, dest) {
   return new Promise((resolve, reject) => {
     ncp(src, dest, function (err) {
-     if (err) {
-       reject(err);
-     } else {
-       resolve();
-     }
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
     });
   });
 }
@@ -58,7 +60,7 @@ function writeFile(path, contents) {
 
 function publish(path) {
   return new Promise((resolve, reject) => {
-    ghpages.publish(path, function(err) {
+    ghpages.publish(path, function (err) {
       if (err) {
         reject(err);
       } else {
@@ -72,8 +74,8 @@ function publish(path) {
   /**
    * Start local server
    */
-  const server = spawn('node', ['index.js', '3997', 'build']);
-  server.stdout.pipe(process.stdout)
+  const server = spawn("node", ["index.js", "3997", "build"]);
+  server.stdout.pipe(process.stdout);
   server.stderr.pipe(process.stdout);
 
   /**
@@ -89,42 +91,48 @@ function publish(path) {
   /**
    * Copy static files
    */
-  await copy('static', output);
+  await copy("static", output);
 
   /**
-   * Fetch sitemap and convert to JSON
+   * Fetch sitemap
    */
   const sitemap = await axios
-  .get(`${host}/sitemap.xml`)
-  .then(({ data }) => new Promise((resolve, reject) => {
-    xml2js.parseString(data, function (err, result) {
+    .get(`${serverHost}/sitemap.xml`)
+    .then(({ data }) => data);
+
+  /**
+   * Convert sitemap to JSON
+   */
+  const sitemapAsJSON = await new Promise((resolve, reject) => {
+    xml2js.parseString(sitemap, function (err, result) {
       if (err) {
         reject(err);
-      } else{
+      } else {
         resolve(result);
       }
     });
-  }));
+  });
 
-  const {
-    urlset: {
-      url = []
-    } = {},
-  } = sitemap;
+  /**
+   * Generate sitemap for the published url
+   */
+  const generatedSitemap = await axios
+    .get(`${serverHost}/sitemap.xml?host=${sitemapHost}`)
+    .then(({ data }) => data);
+
+  const { urlset: { url = [] } = {} } = sitemapAsJSON;
 
   /**
    * Get the HTML for each of the pages
    */
-  const filePromises = url
-  .map(async ({ loc }, i) => {
+  const filePromises = url.map(async ({ loc }, i) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(loc[0]);
     await page.waitFor(100);
-    await page.screenshot({ path: `example-${i}.png` });
     const html = await page.content();
     await browser.close();
-    const path = join(loc[0].split(`${host}`)[1], 'index.html');
+    const path = join(loc[0].split(`${serverHost}`)[1], "index.html");
     return { path, html };
   });
 
@@ -138,9 +146,22 @@ function publish(path) {
   }
 
   /**
+   * Copy sitemap.xml
+   */
+  try {
+    await writeFile(join(output, "sitemap.xml"), generatedSitemap);
+  } catch (error) {
+    console.log(error);
+  }
+
+  /**
    * Publish to github pages
    */
-  await publish(output);
+  try {
+    await publish(output);
+  } catch (error) {
+    console.log(error);
+  }
 
   /**
    * Remove dist folder
@@ -150,5 +171,10 @@ function publish(path) {
   /**
    * Stop local server
    */
-  server.kill('SIGINT');
+  server.kill("SIGINT");
+
+  /**
+   * Report to user that everything was okay
+   */
+  console.log(`Published site to ${blip.homepage}`);
 })();
