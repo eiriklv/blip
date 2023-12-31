@@ -49,21 +49,22 @@ const app = express();
  */
 app.get("/sitemap.xml", function (req, res) {
   const hostOverride = req.query.host || host;
+  const subpathOverride = req.query.subpath || "";
   res.header("Content-Type", "application/xml");
 
   const pageEntries = Object.keys(pages).map((pageKey) => ({
-    url: `/${pageKey}`,
+    url: `${subpathOverride}/${pageKey}`,
   }));
 
   const postEntries = Object.keys(posts).map((postKey) => ({
-    url: `/posts/${postKey}`,
+    url: `${subpathOverride}/posts/${postKey}`,
   }));
 
   const sitemap = new Sitemap({
     urls: [
-      { url: "/" },
+      { url: `${subpathOverride}/` },
       ...pageEntries,
-      { url: `/${blogPageName}` },
+      { url: `${subpathOverride}/${blogPageName}` },
       ...postEntries,
     ],
     hostname: hostOverride,

@@ -15,7 +15,8 @@ const { blip } = require("../package.json");
  * NOTE: We're just choosing a port that most likely is not in use
  */
 const serverHost = "http://localhost:3997";
-const sitemapHost = blip.sitemapHost;
+const publishHost = blip.host;
+const publishPath = blip.homepage;
 
 /**
  * Specify the output directory for the generated static files
@@ -81,7 +82,7 @@ function publish(path) {
   /**
    * Wait to ensure server is ready to accept incoming requests
    */
-  await wait(1000);
+  await wait(2000);
 
   /**
    * Delete existing files
@@ -117,7 +118,7 @@ function publish(path) {
    * Generate sitemap for the published url
    */
   const generatedSitemap = await axios
-    .get(`${serverHost}/sitemap.xml?host=${sitemapHost}`)
+    .get(`${serverHost}/sitemap.xml?host=${publishHost}&subpath=${publishPath}`)
     .then(({ data }) => data);
 
   const { urlset: { url = [] } = {} } = sitemapAsJSON;
