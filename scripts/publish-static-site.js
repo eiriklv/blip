@@ -137,7 +137,24 @@ function publish(path) {
     return { path, html };
   });
 
-  const files = await Promise.all(filePromises);
+  /**
+   * Get the HTML for the 404 page
+   */
+  const notFoundFilePromise = (async () => {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(serverHost + "/404.html");
+    await page.waitFor(100);
+    const html = await page.content();
+    await browser.close();
+    const path = "404.html";
+    return { path, html };
+  })();
+
+  /**
+   * Perform the actual fetching and processing
+   */
+  const files = await Promise.all([...filePromises, notFoundFilePromise]);
 
   /**
    * Create folder structure of static site
@@ -167,7 +184,7 @@ function publish(path) {
   /**
    * Remove dist folder
    */
-  rimraf.sync(output);
+  //rimraf.sync(output);
 
   /**
    * Stop local server

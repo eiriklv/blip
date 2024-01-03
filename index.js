@@ -1,11 +1,9 @@
 /**
  * Dependencies
  */
-const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const url = require("url");
-const util = require("util");
 const marked = require("marked");
 const favicon = require("serve-favicon");
 const express = require("express");
@@ -38,6 +36,7 @@ const prefix = buildMode ? homepage : "";
  */
 const pages = getContent("pages");
 const posts = getContent("posts");
+const notFound = getContent("not-found")["404"];
 
 /**
  * Create express app
@@ -95,7 +94,6 @@ function render(req, res) {
   let post = posts[route.name];
   let page = pages[route.base];
   let isFound = !!(post || page);
-  let notFound = pages["not-found"];
   let { title } = post || page || notFound;
 
   let markup = `
